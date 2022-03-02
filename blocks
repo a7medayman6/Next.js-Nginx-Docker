@@ -1,0 +1,10 @@
+1. add to the webserver volumes 
+- dhparam:/etc/ssl/certs
+
+2. add to the volumes section
+  dhparam:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./dhparam/
+      o: bind

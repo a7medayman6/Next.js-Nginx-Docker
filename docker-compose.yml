@@ -1,8 +1,54 @@
 version: '3'
+
 services:
-  nextjs:
-    build: ./
-  nginx:
-    build: ./nginx
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: web-app
+    container_name: web-app
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  webserver:
+    image: nginx:mainline-alpine
+    container_name: webserver
+    restart: unless-stopped
     ports:
-      - 80:80
+      - "80:80"
+      - "443:443"
+    volumes:
+      - web-root:/var/www/html
+      - ./nginx-conf:/etc/nginx/conf.d
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+    depends_on:
+      - web-app
+    networks:
+      - app-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - webserver
+    command: certonly --webroot --webroot-path=/var/www/html --email a.ayman6000@gmail.com --agree-tos --no-eff-email --staging -d admin-staging.beyonddigitalhealth-hit.com -d www.admin-staging.beyonddigitalhealth-hit.com
+
+volumes:
+  certbot-etc:
+  certbot-var:
+  web-root:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./pages
+      o: bind
+
+networks:
+  app-network:
+    driver: bridge  
