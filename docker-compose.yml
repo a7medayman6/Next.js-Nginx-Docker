@@ -23,6 +23,7 @@ services:
       - ./nginx-conf:/etc/nginx/conf.d
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
+      - dhparam:/etc/ssl/certs
     depends_on:
       - web-app
     networks:
@@ -37,7 +38,7 @@ services:
       - web-root:/var/www/html
     depends_on:
       - webserver
-    command: certonly --webroot --webroot-path=/var/www/html --email a.ayman6000@gmail.com --agree-tos --no-eff-email --staging -d admin-staging.beyonddigitalhealth-hit.com -d www.admin-staging.beyonddigitalhealth-hit.com
+    command: certonly --webroot --webroot-path=/var/www/html --email a.ayman6000@gmail.com --agree-tos --no-eff-email --force-renewal -d admin-staging.beyonddigitalhealth-hit.com
 
 volumes:
   certbot-etc:
@@ -48,7 +49,12 @@ volumes:
       type: none
       device: ./pages
       o: bind
-
+  dhparam:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./dhparam/
+      o: bind
 networks:
   app-network:
     driver: bridge  
